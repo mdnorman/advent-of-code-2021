@@ -1,9 +1,7 @@
 package com.denormans.adventofcode
 
-import java.io.File
-
 fun main() {
-  val numbers = File("input/day1.txt").readLines().map { it.toInt() }
+  val numbers = loadNumbers(1)
   problemOne(numbers)
   problemTwo(numbers)
 }

@@ -20,14 +20,10 @@ private fun problemTwo(numbers: List<Int>) {
   println("Problem 2: $count")
 }
 
-private fun countIfMore(numbers: List<Int>): Int {
-  var previous = Int.MAX_VALUE
-  var count = 0
-  numbers.forEach {
-    if (it > previous) {
-      count += 1
-    }
-    previous = it
+private fun countIfMore(numbers: List<Int>) = numbers.fold(0 to Int.MAX_VALUE) { (count, previous), current ->
+  if (current > previous) {
+    count + 1 to current
+  } else {
+    count to current
   }
-  return count
-}
+}.first

@@ -7,7 +7,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
  * Learn how to create Gradle builds at https://guides.gradle.org/creating-new-gradle-builds/
  */
 
-group = "CHANGEME"
+group = "com.denormans.adventofcode"
 version = "0.0.1"
 
 val kotlinVersion = "1.3.61"

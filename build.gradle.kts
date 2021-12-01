@@ -10,7 +10,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "com.denormans.adventofcode"
 version = "0.0.1"
 
-val kotlinVersion = "1.3.61"
+val kotlinVersion = "1.6.0"
 val junitVersion = "5.8.1"
 
 plugins {

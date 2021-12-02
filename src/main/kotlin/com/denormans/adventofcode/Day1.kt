@@ -1,7 +1,8 @@
 package com.denormans.adventofcode
 
 fun main() {
-  val numbers = loadNumbers(1)
+  val numbers = loadNumbers(1, forTest = false)
+
   problemOne(numbers)
   problemTwo(numbers)
 }

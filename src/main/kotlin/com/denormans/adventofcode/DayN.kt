@@ -1,15 +1,18 @@
 package com.denormans.adventofcode
 
 fun main() {
-  val numbers = loadNumbers(0)
-  problemOne(numbers)
-  problemTwo(numbers)
+  val values = loadStrings(0, forTest = false)
+
+  problemOne(values)
+  problemTwo(values)
 }
 
-private fun problemOne(numbers: List<Int>) {
+private fun problemOne(values: List<String>) {
+
   println("Problem 1:")
 }
 
-private fun problemTwo(numbers: List<Int>) {
+private fun problemTwo(values: List<String>) {
+
   println("Problem 2:")
 }

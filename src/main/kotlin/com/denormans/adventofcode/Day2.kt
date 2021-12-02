@@ -1,8 +1,8 @@
 package com.denormans.adventofcode
 
 fun main() {
-  val commands = loadStrings(2).map {
-    val (direction, amount) = it.split(" ")
+  val commands = loadStringPairs(2, forTest = false).map {
+    val (direction, amount) = it
     direction to amount.toInt()
   }
 

@@ -9,27 +9,27 @@ fun main() {
 
 private fun problemOne(values: List<String>) {
   val numBits = values.first().length
-  val gamma = (0..(numBits - 1)).map { mostBits(values, it) shl (numBits - it - 1) }.sum()
-  val epsilon = (0..(numBits - 1)).map { leastBits(values, it) shl (numBits - it - 1) }.sum()
+  val gamma = (0 until numBits).sumOf { mostBits(values, it) shl (numBits - it - 1) }
+  val epsilon = (0 until numBits).sumOf { leastBits(values, it) shl (numBits - it - 1) }
 
   println("Problem 1: epsilon=$epsilon, gamme=$gamma: ${gamma * epsilon}")
 }
 
 private fun mostBits(values: List<String>, bitIndex: Int): Int {
   val (ones, zeroes) = countBits(values, bitIndex)
-  if (ones >= zeroes) {
-    return 1
+  return if (ones >= zeroes) {
+    1
   } else {
-    return 0
+    0
   }
 }
 
 private fun leastBits(values: List<String>, bitIndex: Int): Int {
   val (ones, zeroes) = countBits(values, bitIndex)
-  if (ones >= zeroes) {
-    return 0
+  return if (ones >= zeroes) {
+    0
   } else {
-    return 1
+    1
   }
 }
 

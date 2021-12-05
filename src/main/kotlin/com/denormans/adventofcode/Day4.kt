@@ -1,14 +1,21 @@
 package com.denormans.adventofcode
 
+import com.denormans.adventofcode.utils.displayGrid
+import com.denormans.adventofcode.utils.loadStrings
+
 fun main() {
-  val values = loadStrings(4, forTest = false).filter { it.isNotBlank() }
+  val values = loadStrings(4, forTest = true).filter { it.isNotBlank() }
 
   val numbers = values.first().split(",").map { it.toInt() }
   println(numbers)
 
   val boards = splitIntoBoards(values.subList(1, values.size))
-  println(boards)
-  println(boards.map { transformBoard(it) })
+  boards.forEach {
+    displayGrid(it)
+    println()
+    displayGrid(transformBoard(it))
+    println()
+  }
 
   problemOne(numbers, boards)
   problemTwo(numbers, boards)

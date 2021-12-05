@@ -1,4 +1,4 @@
-package com.denormans.adventofcode
+package com.denormans.adventofcode.utils
 
 import java.io.File
 

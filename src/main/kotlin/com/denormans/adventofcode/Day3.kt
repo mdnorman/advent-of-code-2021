@@ -1,5 +1,7 @@
 package com.denormans.adventofcode
 
+import com.denormans.adventofcode.utils.loadStrings
+
 fun main() {
   val values = loadStrings(3, forTest = false)
 

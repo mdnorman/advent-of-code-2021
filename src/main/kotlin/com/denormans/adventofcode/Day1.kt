@@ -1,5 +1,7 @@
 package com.denormans.adventofcode
 
+import com.denormans.adventofcode.utils.loadNumbers
+
 fun main() {
   val numbers = loadNumbers(1, forTest = false)
 

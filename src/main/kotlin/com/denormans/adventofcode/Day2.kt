@@ -1,5 +1,7 @@
 package com.denormans.adventofcode
 
+import com.denormans.adventofcode.utils.loadStringPairs
+
 fun main() {
   val commands = loadStringPairs(2, forTest = false).map {
     val (direction, amount) = it

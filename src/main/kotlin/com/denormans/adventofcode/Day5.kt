@@ -1,7 +1,13 @@
 package com.denormans.adventofcode
 
+import com.denormans.adventofcode.utils.by
+import com.denormans.adventofcode.utils.displayGrid
+import com.denormans.adventofcode.utils.loadStrings
+import com.denormans.adventofcode.utils.println
+import com.denormans.adventofcode.utils.withCount
+
 fun main() {
-  val values = loadStrings(5, forTest = false)
+  val values = loadStrings(5, forTest = true)
 
   val lines = values.map {
     val (x1, y1, x2, y2) = it.split(" -> ").joinToString(",").split(",").map { it.toInt() }
@@ -16,15 +22,15 @@ data class VentLine(val x1: Int, val x2: Int, val y1: Int, val y2: Int) {
   val pointsHV by lazy {
     if (x1 == x2) {
       if (y1 < y2) {
-        (y1..y2).map { x1 to it }
+        (y1..y2).map { x1 by it }
       } else {
-        (y2..y1).map { x1 to it }
+        (y2..y1).map { x1 by it }
       }
     } else if (y1 == y2) {
       if (x1 < x2) {
-        (x1..x2).map { it to y1 }
+        (x1..x2).map { it by y1 }
       } else {
-        (x2..x1).map { it to y1 }
+        (x2..x1).map { it by y1 }
       }
     } else {
       emptyList()
@@ -34,33 +40,33 @@ data class VentLine(val x1: Int, val x2: Int, val y1: Int, val y2: Int) {
   val points by lazy {
     if (x1 == x2) {
       if (y1 < y2) {
-        (y1..y2).map { x1 to it }
+        (y1..y2).map { x1 by it }
       } else {
-        (y2..y1).map { x1 to it }
+        (y2..y1).map { x1 by it }
       }
     } else if (y1 == y2) {
       if (x1 < x2) {
-        (x1..x2).map { it to y1 }
+        (x1..x2).map { it by y1 }
       } else {
-        (x2..x1).map { it to y1 }
+        (x2..x1).map { it by y1 }
       }
     } else {
       if (x1 < x2) {
         val num = x2-x1
         (0..num).map {
           if (y1 < y2) {
-            (x1+it) to (y1+it)
+            (x1+it) by (y1+it)
           } else {
-            (x1+it) to (y1-it)
+            (x1+it) by (y1-it)
           }
         }
       } else {
         val num = x1-x2
         (0..num).map {
           if (y1 < y2) {
-            (x1-it) to (y1+it)
+            (x1-it) by (y1+it)
           } else {
-            (x1-it) to (y1-it)
+            (x1-it) by (y1-it)
           }
         }
       }
@@ -69,37 +75,25 @@ data class VentLine(val x1: Int, val x2: Int, val y1: Int, val y2: Int) {
 }
 
 private fun problemOne(lines: List<VentLine>) {
-  lines.forEach {
-    println(it.pointsHV)
-  }
+  lines.map { it.pointsHV }.println()
 
   val allPoints = lines.map { it.pointsHV }.flatten()
-  val allPointsSet = mutableSetOf<Pair<Int, Int>>()
-  val counted = mutableSetOf<Pair<Int, Int>>()
-  allPoints.forEach { point ->
-    if (!allPointsSet.add(point)) {
-      counted.add(point)
-      println("added $point")
-    }
-  }
+  displayGrid(allPoints)
 
-  println("Problem 1: ${counted.size}")
+  val allPointsWithCount = allPoints.withCount()
+  val badPoints = allPointsWithCount.filterValues { it > 1 }
+
+  println("Problem 1: $badPoints (${badPoints.size})")
 }
 
 private fun problemTwo(lines: List<VentLine>) {
-  lines.forEach {
-    println(it.points)
-  }
+  lines.map { it.points }.println()
 
   val allPoints = lines.map { it.points }.flatten()
-  val allPointsSet = mutableSetOf<Pair<Int, Int>>()
-  val counted = mutableSetOf<Pair<Int, Int>>()
-  allPoints.forEach { point ->
-    if (!allPointsSet.add(point)) {
-      counted.add(point)
-      println("added $point")
-    }
-  }
+  displayGrid(allPoints)
 
-  println("Problem 2: ${counted.size}")
+  val allPointsWithCount = allPoints.withCount()
+  val badPoints = allPointsWithCount.filterValues { it > 1 }
+
+  println("Problem 2: $badPoints (${badPoints.size})")
 }

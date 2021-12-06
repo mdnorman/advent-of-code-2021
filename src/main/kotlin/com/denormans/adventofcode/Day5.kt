@@ -1,77 +1,26 @@
 package com.denormans.adventofcode
 
-import com.denormans.adventofcode.utils.by
+import com.denormans.adventofcode.utils.Point
 import com.denormans.adventofcode.utils.displayGrid
 import com.denormans.adventofcode.utils.loadStrings
 import com.denormans.adventofcode.utils.println
 import com.denormans.adventofcode.utils.withCount
 
 fun main() {
-  val values = loadStrings(5, forTest = true)
+  val values = loadStrings(5, forTest = false)
 
   val lines = values.map {
-    val (x1, y1, x2, y2) = it.split(" -> ").joinToString(",").split(",").map { it.toInt() }
-    VentLine(x1, x2, y1, y2)
+    val (p1, p2) = it.split(" -> ")
+    VentLine(Point.parse(p1), Point.parse(p2))
   }
 
   problemOne(lines)
   problemTwo(lines)
 }
 
-data class VentLine(val x1: Int, val x2: Int, val y1: Int, val y2: Int) {
-  val pointsHV by lazy {
-    if (x1 == x2) {
-      if (y1 < y2) {
-        (y1..y2).map { x1 by it }
-      } else {
-        (y2..y1).map { x1 by it }
-      }
-    } else if (y1 == y2) {
-      if (x1 < x2) {
-        (x1..x2).map { it by y1 }
-      } else {
-        (x2..x1).map { it by y1 }
-      }
-    } else {
-      emptyList()
-    }
-  }
-
-  val points by lazy {
-    if (x1 == x2) {
-      if (y1 < y2) {
-        (y1..y2).map { x1 by it }
-      } else {
-        (y2..y1).map { x1 by it }
-      }
-    } else if (y1 == y2) {
-      if (x1 < x2) {
-        (x1..x2).map { it by y1 }
-      } else {
-        (x2..x1).map { it by y1 }
-      }
-    } else {
-      if (x1 < x2) {
-        val num = x2-x1
-        (0..num).map {
-          if (y1 < y2) {
-            (x1+it) by (y1+it)
-          } else {
-            (x1+it) by (y1-it)
-          }
-        }
-      } else {
-        val num = x1-x2
-        (0..num).map {
-          if (y1 < y2) {
-            (x1-it) by (y1+it)
-          } else {
-            (x1-it) by (y1-it)
-          }
-        }
-      }
-    }
-  }
+data class VentLine(val p1: Point, val p2: Point) {
+  val pointsHV by lazy { p1.interpolate(p2, includeDiagonal = false) }
+  val points by lazy { p1.interpolate(p2) }
 }
 
 private fun problemOne(lines: List<VentLine>) {

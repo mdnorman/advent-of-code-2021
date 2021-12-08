@@ -71,3 +71,5 @@ class PointFromOriginComparator : Comparator<Point> {
 }
 
 infix fun Int.by(y: Int) = Point(this, y)
+
+val sevenSegmentNumbers = listOf("abcefg", "cf", "acdeg", "acdfg", "bcdf", "abdfg", "abdefg", "acf", "abcdefg", "abcdfg")

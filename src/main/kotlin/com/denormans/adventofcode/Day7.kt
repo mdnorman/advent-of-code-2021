@@ -16,7 +16,7 @@ private fun problemOne(values: List<Int>) {
   println("Problem 1: $moves")
 }
 
-fun movesToN(values: List<Int>, n: Int)= values.map { abs(it - n) }.sum()
+private fun movesToN(values: List<Int>, n: Int)= values.map { abs(it - n) }.sum()
 
 private fun problemTwo(values: List<Int>) {
   val cost = (values.minOf { it }..values.maxOf { it }).minOf { costToN(values, it) }
@@ -24,7 +24,7 @@ private fun problemTwo(values: List<Int>) {
   println("Problem 2: $cost")
 }
 
-fun costToN(values: List<Int>, n: Int) = values.map {
+private fun costToN(values: List<Int>, n: Int) = values.map {
   val moves = abs(it - n)
   moves * (moves + 1) / 2
 }.sum()

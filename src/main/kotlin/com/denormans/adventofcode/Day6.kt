@@ -10,7 +10,7 @@ fun main() {
   problemTwo(values)
 }
 
-data class Lanternfish(var daysLeft: Int) {
+private data class Lanternfish(var daysLeft: Int) {
   val readyForProcreation: Boolean
     get() = daysLeft == 0
 

@@ -12,7 +12,7 @@ fun main() {
   problemTwo(values)
 }
 
-data class Data(val input: List<String>, val output: List<String>) {
+private data class Data(val input: List<String>, val output: List<String>) {
   val correctOutput by lazy {
     val knownNumbers = populateCorrections()
 

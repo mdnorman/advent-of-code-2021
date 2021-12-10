@@ -56,7 +56,7 @@ private fun problemTwo(values: List<String>) {
   println("Problem 2: ${a*b*c}")
 }
 
-fun basinSize(values: List<String>, p: Point, foundPoints: MutableSet<Point> = mutableSetOf()): Int {
+private fun basinSize(values: List<String>, p: Point, foundPoints: MutableSet<Point> = mutableSetOf()): Int {
   if (!foundPoints.add(p)) {
     return 0
   }

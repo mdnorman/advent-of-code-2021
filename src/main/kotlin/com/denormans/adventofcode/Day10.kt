@@ -63,6 +63,6 @@ private fun fixIncomplete(value: String): String? {
   return String(stack.map { pairs.getValue(it) }.reversed().toCharArray())
 }
 
-val pairs = mapOf('(' to ')', '[' to ']', '{' to '}', '<' to '>')
-val badPoints = mapOf(')' to 3, ']' to 57, '}' to 1197, '>' to 25137)
-val goodPoints = mapOf(')' to 1, ']' to 2, '}' to 3, '>' to 4)
+private val pairs = mapOf('(' to ')', '[' to ']', '{' to '}', '<' to '>')
+private val badPoints = mapOf(')' to 3, ']' to 57, '}' to 1197, '>' to 25137)
+private val goodPoints = mapOf(')' to 1, ']' to 2, '}' to 3, '>' to 4)

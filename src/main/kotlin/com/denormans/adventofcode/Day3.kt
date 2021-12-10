@@ -70,4 +70,4 @@ private fun problemTwo(values: List<String>) {
   println("Problem 2: oxygenGeneratorRating=$oxygenGeneratorRating, co2ScrubberRating=$co2ScrubberRating: ${oxygenGeneratorRating * co2ScrubberRating}")
 }
 
-fun String.fromBinary() = toCharArray().mapIndexed { index, ch -> (ch - '0') shl (length - index - 1) }.sum()
+private fun String.fromBinary() = toCharArray().mapIndexed { index, ch -> (ch - '0') shl (length - index - 1) }.sum()

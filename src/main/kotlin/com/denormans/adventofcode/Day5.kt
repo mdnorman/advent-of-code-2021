@@ -18,7 +18,7 @@ fun main() {
   problemTwo(lines)
 }
 
-data class VentLine(val p1: Point, val p2: Point) {
+private data class VentLine(val p1: Point, val p2: Point) {
   val pointsHV by lazy { p1.interpolate(p2, includeDiagonal = false) }
   val points by lazy { p1.interpolate(p2) }
 }

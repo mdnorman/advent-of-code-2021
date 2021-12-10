@@ -21,7 +21,7 @@ fun main() {
   problemTwo(numbers, boards)
 }
 
-fun splitIntoBoards(values: List<String>): List<List<List<Int>>> =
+private fun splitIntoBoards(values: List<String>): List<List<List<Int>>> =
   values
     .map {
       it.split(" ").filter { it.isNotBlank() }.map { it.toInt() }
@@ -72,8 +72,8 @@ private fun problemTwo(numbers: List<Int>, boards: List<List<List<Int>>>) {
   println("Problem 2: winningBoard=$winningBoard, unmarkedNumbers=$unmarkedNumbers (${unmarkedNumbers.sum()}), justCalled:$justCalled: ${unmarkedNumbers.sum() * justCalled}")
 }
 
-fun linesForBoard(board: List<List<Int>>) = board + transformBoard(board)
+private fun linesForBoard(board: List<List<Int>>) = board + transformBoard(board)
 
-fun transformBoard(board: List<List<Int>>)= (1..5).mapIndexed { index, _ ->
+private fun transformBoard(board: List<List<Int>>)= (1..5).mapIndexed { index, _ ->
   board.map { it[index] }
 }

@@ -1,11 +1,10 @@
 package com.denormans.adventofcode
 
 import com.denormans.adventofcode.utils.loadStrings
-import com.denormans.adventofcode.utils.println
 import com.denormans.adventofcode.utils.withCount
 
 fun main() {
-  val values = loadStrings(14, forTest = true)
+  val values = loadStrings(14, forTest = false)
 //  values.println()
 
   val template = values.first().toCharArray().toList()
@@ -15,7 +14,7 @@ fun main() {
     (a to b) to insertion[0]
   }.toMap()
 
-  val polymer = Polymer(template, pairInsertions)
+  val polymer = Polymer(template.toPairs().withCount(), pairInsertions, template.last())
 
   polymer.println()
 
@@ -23,13 +22,35 @@ fun main() {
   problemTwo(polymer)
 }
 
-private data class Polymer(val template: List<Char>, val pairInsertions: Map<Pair<Char, Char>, Char>) {
-  val pairs by lazy { template.subList(0, template.lastIndex).mapIndexed { index, c -> c to template[index+1] } }
+/*
+store as pairs
+NNCB
 
-  fun nextStep() =
-    Polymer(pairs.flatMap { listOf(it.first, pairInsertions.getValue(it)) } + pairs.last().second, pairInsertions)
+NN NC CB
 
-  fun println() = println(String(template.toCharArray()))
+NCNNBCCHB
+
+NC CN NN NB BC CC CH HB
+ */
+
+private data class Polymer(val templatePairs: Map<Pair<Char, Char>, Long>, val pairInsertions: Map<Pair<Char, Char>, Char>, val lastChar: Char) {
+  fun nextStep(): Polymer {
+    val newPairs = mutableMapOf<Pair<Char, Char>, Long>()
+
+    templatePairs.forEach { (pair, count) ->
+      val (pair1, pair2) = pair.newPairs()
+      newPairs[pair1] = newPairs.getOrDefault(pair1, 0) + count
+      newPairs[pair2] = newPairs.getOrDefault(pair2, 0) + count
+    }
+    return copy(templatePairs = newPairs)
+  }
+
+  fun Pair<Char, Char>.newPairs(): List<Pair<Char, Char>> {
+    val insertion = pairInsertions.getValue(this)
+    return listOf(first to insertion, insertion to second)
+  }
+
+  fun println() = println(templatePairs)
 }
 
 private fun problemOne(polymer: Polymer) {
@@ -37,7 +58,13 @@ private fun problemOne(polymer: Polymer) {
 
   lastPolymer.println()
 
-  val counts = lastPolymer.template.withCount()
+  val counts = mutableMapOf<Char, Long>()
+  lastPolymer.templatePairs.forEach { (key, value) ->
+    val ch = key.first
+    counts[ch] = counts.getOrDefault(ch, 0) + value
+  }
+  counts[polymer.lastChar] = counts.getOrDefault(polymer.lastChar, 0) + 1
+
   val mostCommon = counts.maxOf { (k, v) -> v }
   val leastCommon = counts.minOf { (k, v) -> v }
 
@@ -49,9 +76,17 @@ private fun problemTwo(polymer: Polymer) {
 
   lastPolymer.println()
 
-  val counts = lastPolymer.template.withCount()
+  val counts = mutableMapOf<Char, Long>()
+  lastPolymer.templatePairs.forEach { (key, value) ->
+    val ch = key.first
+    counts[ch] = counts.getOrDefault(ch, 0) + value
+  }
+  counts[polymer.lastChar] = counts.getOrDefault(polymer.lastChar, 0) + 1
+
   val mostCommon = counts.maxOf { (k, v) -> v }
   val leastCommon = counts.minOf { (k, v) -> v }
 
   println("Problem 2: $mostCommon - $leastCommon = ${mostCommon - leastCommon}")
 }
+
+private fun <T> List<T>.toPairs() = subList(0, lastIndex).mapIndexed { index, c -> c to this[index+1] }

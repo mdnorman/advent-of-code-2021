@@ -60,7 +60,7 @@ data class Point(val x: Int, val y: Int) : Comparable<Point> {
   companion object {
     fun parse(text: String, separator: Char = ',') = text.split(separator).toPoint()
 
-    fun List<String>.toPoint() = Point(this[0].toInt(), this[1].toInt())
+    private fun List<String>.toPoint() = Point(this[0].toInt(), this[1].toInt())
   }
 }
 

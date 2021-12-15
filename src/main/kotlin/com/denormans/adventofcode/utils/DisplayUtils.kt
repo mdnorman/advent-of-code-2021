@@ -2,10 +2,12 @@ package com.denormans.adventofcode.utils
 
 fun <T> Collection<T>.println() = forEach { println(it) }
 
-fun <T> displayGrid(values: List<List<T>>) {
+fun <T> Grid<T>.displayGrid(separator: String = " ") = displayGrid(values, separator)
+
+fun <T> displayGrid(values: List<List<T>>, separator: String = " ") {
   values.forEach { row ->
-    row.forEach {
-      print("$it ")
+    row.forEach { value ->
+      print("$value$separator")
     }
     println()
   }

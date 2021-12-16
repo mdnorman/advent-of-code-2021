@@ -5,10 +5,11 @@ import com.denormans.adventofcode.utils.Point
 import com.denormans.adventofcode.utils.by
 import com.denormans.adventofcode.utils.displayGrid
 import com.denormans.adventofcode.utils.loadStrings
-import com.denormans.adventofcode.utils.println
 import com.denormans.adventofcode.utils.surroundingPoints
 import com.denormans.adventofcode.utils.toGrid
 import com.denormans.adventofcode.utils.withCount
+import java.lang.Integer.min
+import kotlin.random.Random
 
 fun main() {
   val grid = loadStrings(15, forTest = false).map { it.map { it.toString().toInt() } }.toGrid()
@@ -21,8 +22,10 @@ fun main() {
 private fun problemOne(grid: Grid<Int>) {
   val pathToEnd = grid.findPathToEnd()
   println("Path to end: $pathToEnd")
+//  val cost = pathToEnd.subList(1, pathToEnd.size).sumOf { grid[it] }
+  val cost = pathToEnd.cost
 
-  println("Problem 1: ${pathToEnd.cost}")
+  println("Problem 1: $cost")
 }
 
 private fun problemTwo(grid: Grid<Int>) {
@@ -38,7 +41,9 @@ private data class Path(val currentPoint: Point, val pointCost: Int, val parentP
 
   private val hashCode: Int by lazy { 13 * (parentPath?.hashCode ?: 0) + currentPoint.hashCode() }
 
-  override fun toString() = points.joinToString(" ")
+  fun hasPoint(point: Point): Boolean = currentPoint == point || (parentPath?.hasPoint(point) ?: false)
+
+  override fun toString() = "$cost: " + points.joinToString(" ")
 
   override fun equals(other: Any?) = other is Path && points == other.points
 
@@ -64,6 +69,37 @@ private data class Path(val currentPoint: Point, val pointCost: Int, val parentP
   }
 }
 
+private fun Grid<Int>.findShortestPathToEnd(): List<Point> {
+  val startingPoint = 0 by 0
+  val end = maxPoint
+
+  var bestCost = Int.MAX_VALUE
+  fun findShortestPathToEnd(currentPoint: Point, currentCost: Int): Pair<List<Point>, Int>? {
+    if (currentPoint == end) {
+      bestCost = min(bestCost, currentCost)
+      println("best: $bestCost")
+      return listOf(currentPoint) to currentCost
+    }
+
+//    if (Random.nextInt() % 1000 == 0) {
+//      println("findShortestPath: $path")
+//    }
+
+    val (path, cost) = currentPoint.surroundingPoints(maxPoint)
+      .filter { newPoint -> newPoint.x >= currentPoint.x && newPoint.y >= currentPoint.y }
+//      .filterNot { newPoint -> path.hasPoint(newPoint) }
+      .map { newPoint -> newPoint to currentCost + this[newPoint] }
+      .filter { (_, newCost) -> newCost < bestCost }
+      .map { (newPoint, newCost) -> findShortestPathToEnd(newPoint, newCost) }
+      .filterNotNull()
+      .minByOrNull { (_, cost) -> cost } ?: return null
+
+    return path + currentPoint to cost
+  }
+
+  return findShortestPathToEnd(startingPoint, 0)?.first ?: throw IllegalStateException("No path found!")
+}
+
 private fun Grid<Int>.findPathToEnd(): Path {
   val start = 0 by 0
   val end = maxPoint
@@ -71,12 +107,10 @@ private fun Grid<Int>.findPathToEnd(): Path {
   val seenPaths = mutableSetOf<Path>()
   val pathsToEnd = sortedSetOf(Path(start, 0))
 
-  var count = 0
   while (pathsToEnd.isNotEmpty()) {
     val lowestCostPath = pathsToEnd.first()
 
-    count += 1
-    if (count % 200 == 0) {
+    if (Random.nextInt() % 10000 == 0) {
       println("Lowest cost path of ${pathsToEnd.size} (${lowestCostPath.cost}): $lowestCostPath")
     }
 
@@ -99,8 +133,8 @@ private fun Grid<Int>.findPathToEnd(): Path {
 
 private fun Grid<Int>.findNextPaths(currentPath: Path) =
   currentPath.currentPoint.surroundingPoints(maxPoint)
+    .filterNot { currentPath.hasPoint(it) }
     .map { toPath(currentPath, it) }
-    .filterNot { it.isCycle }
 
 private fun Grid<Int>.toPath(currentPath: Path, newPoint: Point) =
   Path(newPoint, this[newPoint], currentPath)

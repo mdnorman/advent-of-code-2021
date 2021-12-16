@@ -1,10 +1,13 @@
 package com.denormans.adventofcode.utils
 
+import java.lang.Integer.max
 import kotlin.math.sqrt
 
 data class Point(val x: Int, val y: Int) : Comparable<Point> {
   val distanceFromOrigin by lazy { sqrt(distanceFromOriginSquared.toDouble()) }
   val distanceFromOriginSquared by lazy { x * x + y * y }
+  val stepsFromOrigin by lazy { x + y }
+  val diagonalStepsFromOrigin by lazy { max(x, y) }
 
   fun interpolate(other: Point, includeDiagonal: Boolean = true): List<Point> {
     val (x1, y1) = this

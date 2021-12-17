@@ -16,6 +16,8 @@ fun loadStringTriples(dayNumber: Int, forTest: Boolean) = loadStringLists(dayNum
 
 fun loadStringLists(dayNumber: Int, forTest: Boolean) = loadStrings(dayNumber, forTest).map { it.split(" ") }
 
+fun loadString(dayNumber: Int, forTest: Boolean) = loadStrings(dayNumber, forTest).first()
+
 fun loadStrings(dayNumber: Int, forTest: Boolean) =
   File(buildFileName(dayNumber, forTest)).readLines()
 

@@ -168,38 +168,43 @@ private fun Grid<Int>.findPathToEnd2(): Path {
   val startingPoint = 0 by 0
   val end = maxPoint
 
-  val bestPathToEndByStartingPoint = mutableMapOf<Point, Path>()
+  val endPath = Path(end, this[end])
+  val bestPathToEndByStartingPoint = mutableMapOf(end to endPath)
 
-  val nextPoints = sortedMapOf(Comparator { p1, p2 ->
-    when {
-      p1.stepsFromOrigin < p2.stepsFromOrigin -> 1
-      p1.stepsFromOrigin > p2.stepsFromOrigin -> -1
-      p1 < p2 -> 1
-      p1 > p2 -> -1
-      else -> 0
+  fun findBestPathToEnd(currentPoint: Point): Path? {
+    if (currentPoint in bestPathToEndByStartingPoint) {
+      return bestPathToEndByStartingPoint.getValue(currentPoint)
     }
-  }, end to Path(end, this[end]))
 
-  while (nextPoints.isNotEmpty()) {
-    val nextPoint = nextPoints.firstKey()
-
-    val currentBestForNextPoint = nextPoints.getValue(nextPoint)
-
-    nextPoint.surroundingPoints(maxPoint).forEach { newPoint ->
-//      val newCostForNewPoint = currentBestForNextPoint.cost +
-
-      if (newPoint in nextPoints) {
-        val currentBestForNewPoint = nextPoints.getValue(newPoint)
-
+    var bestPath: Path? = null
+    currentPoint.surroundingPoints(this.maxPoint).sortedBy { -it.stepsFromOrigin }.forEach { p ->
+      val pPath = findBestPathToEnd(p)
+      if (pPath != null) {
+        val newPath = pPath.copy(parentPath = Path(currentPoint, this[p]))
+        if (bestPath == null || newPath.cost < bestPath!!.cost) {
+          bestPath = newPath
+        }
       }
     }
 
-    nextPoints.remove(nextPoint)
+    if (bestPath != null) {
+      bestPathToEndByStartingPoint[currentPoint] = bestPath!!
+    }
 
-
+    return bestPath
   }
 
-  throw NotImplementedError("TODO!")
+//  val nextPoints = sortedMapOf(Comparator { p1, p2 ->
+//    when {
+//      p1.stepsFromOrigin < p2.stepsFromOrigin -> 1
+//      p1.stepsFromOrigin > p2.stepsFromOrigin -> -1
+//      p1 < p2 -> 1
+//      p1 > p2 -> -1
+//      else -> 0
+//    }
+//  }, end to Path(end, this[end]))
+
+  TODO("Not implemented yet")
 }
 
 //private fun Grid<Int>.chunked(into: Int): Grid<Grid<Int>> =

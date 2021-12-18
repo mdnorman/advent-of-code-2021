@@ -3,6 +3,8 @@ package com.denormans.adventofcode.utils
 import java.lang.Integer.max
 import kotlin.math.sqrt
 
+fun Pair<Int, Int>.toRange() = first.rangeTo(second)
+
 data class Point(val x: Int, val y: Int) : Comparable<Point> {
   val distanceFromOrigin by lazy { sqrt(distanceFromOriginSquared.toDouble()) }
   val distanceFromOriginSquared by lazy { x * x + y * y }
@@ -59,6 +61,12 @@ data class Point(val x: Int, val y: Int) : Comparable<Point> {
 
     return x - other.x
   }
+
+  operator fun plus(point: Point) = Point(x + point.x, y + point.y)
+
+  operator fun minus(point: Point) = Point(x - point.x, y - point.y)
+
+  operator fun unaryMinus() = Point(-x, -y)
 
   companion object {
     fun parse(text: String, separator: Char = ',') = text.split(separator).toPoint()

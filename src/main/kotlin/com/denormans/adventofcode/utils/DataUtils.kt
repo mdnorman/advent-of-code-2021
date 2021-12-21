@@ -6,12 +6,22 @@ import kotlin.math.sqrt
 
 fun Pair<Int, Int>.toRange() = first.rangeTo(second)
 
+infix fun <A, B, C> A.to(pair: Pair<B, C>) = Triple(this, pair.first, pair.second)
+
+infix fun <A, B, C> Pair<A, B>.to(third: C) = Triple(first, second, third)
+
+infix fun Int.by(y: Int) = Point(this, y)
+
+infix fun Int.by(p: Point) = TriplePoint(this, p.x, p.y)
+
+infix fun Point.by(z: Int) = TriplePoint(x, y, z)
+
 data class Point(val x: Int, val y: Int) : Comparable<Point> {
   val distanceFromOrigin by lazy { sqrt(distanceFromOriginSquared.toDouble()) }
   val distanceFromOriginSquared by lazy { x * x + y * y }
   val stepsFromOrigin by lazy { x + y }
   val diagonalStepsFromOrigin by lazy { max(x, y) }
-  val manhattanDistanceFromOrigin by lazy { manhattanDistanceFrom(Point(0, 0)) }
+  val manhattanDistanceFromOrigin by lazy { manhattanDistanceFrom(0 by 0) }
 
   fun manhattanDistanceFrom(other: Point) = (x - other.x).absoluteValue + (y - other.y).absoluteValue
 
@@ -63,16 +73,16 @@ data class Point(val x: Int, val y: Int) : Comparable<Point> {
       else -> y - other.y
   }
 
-  operator fun plus(point: Point) = Point(x + point.x, y + point.y)
+  operator fun plus(point: Point) = x + point.x by y + point.y
 
-  operator fun minus(point: Point) = Point(x - point.x, y - point.y)
+  operator fun minus(point: Point) = x - point.x by y - point.y
 
-  operator fun unaryMinus() = Point(-x, -y)
+  operator fun unaryMinus() = -x by -y
 
   companion object {
     fun parse(text: String, separator: Char = ',') = text.split(separator).toPoint()
 
-    private fun List<String>.toPoint() = Point(this[0].toInt(), this[1].toInt())
+    private fun List<String>.toPoint() = this[0].toInt() by this[1].toInt()
   }
 }
 
@@ -82,19 +92,17 @@ class PointFromOriginComparator : Comparator<Point> {
   }
 }
 
-infix fun Int.by(y: Int) = Point(this, y)
-
 data class TriplePoint(val x: Int, val y: Int, val z: Int) : Comparable<TriplePoint> {
   val distanceFromOrigin by lazy { sqrt(distanceFromOriginSquared.toDouble()) }
   val distanceFromOriginSquared by lazy { x * x + y * y + z * z }
 
-  val manhattanDistanceFromOrigin by lazy { manhattanDistanceFrom(TriplePoint(0, 0, 0)) }
+  val manhattanDistanceFromOrigin by lazy { manhattanDistanceFrom(0 by 0 by 0) }
 
   fun manhattanDistanceFrom(other: TriplePoint) = (x - other.x).absoluteValue + (y - other.y).absoluteValue + (z - other.z).absoluteValue
 
-  fun rotateAroundX() = TriplePoint(x, -z, y)
-  fun rotateAroundY() = TriplePoint(-z, y, x)
-  fun rotateAroundZ() = TriplePoint(-y, x, z)
+  fun rotateAroundX() = x by -z by y
+  fun rotateAroundY() = -z by y by x
+  fun rotateAroundZ() = -y by x by z
 
   fun withOrientation(orientation: Orientation) = orientation.orient(this)
 
@@ -106,17 +114,25 @@ data class TriplePoint(val x: Int, val y: Int, val z: Int) : Comparable<TriplePo
     else -> z - other.z
   }
 
-  operator fun plus(point: TriplePoint) = TriplePoint(x + point.x, y + point.y, z + point.z)
+  operator fun plus(point: TriplePoint) = x + point.x by y + point.y by z + point.z
 
-  operator fun minus(point: TriplePoint) = TriplePoint(x - point.x, y - point.y, z - point.z)
+  operator fun minus(point: TriplePoint) = x - point.x by y - point.y by z - point.z
 
-  operator fun unaryMinus() = TriplePoint(-x, -y, -z)
+  operator fun unaryMinus() = -x by -y by -z
+
+  companion object {
+    fun parse(text: String, separator: Char = ',') = text.split(separator).toPoint()
+
+    private fun List<String>.toPoint() = this[0].toInt() by this[1].toInt() by this[2].toInt()
+  }
 }
 
 val sevenSegmentNumbers = listOf("abcefg", "cf", "acdeg", "acdfg", "bcdf", "abdfg", "abdefg", "acf", "abcdefg", "abcdfg")
 
 data class Orientation(private val x: Int, private val y: Int, private val z: Int) {
   fun orient(point: TriplePoint): TriplePoint = TriplePoint(point.getPart(x), point.getPart(y), point.getPart(z))
+
+  override fun toString() = "(${partToString(x)},${partToString(y)},${partToString(z)})"
 
   companion object {
     val all by lazy {
@@ -150,6 +166,16 @@ data class Orientation(private val x: Int, private val y: Int, private val z: In
       -2 -> -y
       3 -> z
       -3 -> -z
+      else -> error("Invalid orientation part: $orientationPart")
+    }
+
+    private fun partToString(orientationPart: Int) = when (orientationPart) {
+      1 -> "+x"
+      -1 -> "-x"
+      2 -> "+y"
+      -2 -> "-y"
+      3 -> "+z"
+      -3 -> "-z"
       else -> error("Invalid orientation part: $orientationPart")
     }
   }

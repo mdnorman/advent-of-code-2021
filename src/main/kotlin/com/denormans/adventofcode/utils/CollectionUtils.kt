@@ -5,6 +5,11 @@ fun <T> List<T>.toPair(): Pair<T, T> {
   return a to b
 }
 
+fun <T> List<T>.toTriple(): Triple<T, T, T> {
+  val (a, b, c) = this
+  return Triple(a, b, c)
+}
+
 fun <T> Collection<T>.withCount(): MutableMap<T, Long> {
   val pointsWithCount = mutableMapOf<T, Long>()
   forEach { pointsWithCount[it] = pointsWithCount.getOrDefault(it, 0) + 1 }

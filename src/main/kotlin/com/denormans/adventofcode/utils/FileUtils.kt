@@ -4,15 +4,9 @@ import java.io.File
 
 fun loadNumbers(dayNumber: Int, forTest: Boolean) = loadStrings(dayNumber, forTest).map { it.toInt() }
 
-fun loadStringPairs(dayNumber: Int, forTest: Boolean) = loadStringLists(dayNumber, forTest).map {
-  val (first, second) = it
-  first to second
-}
+fun loadStringPairs(dayNumber: Int, forTest: Boolean) = loadStringLists(dayNumber, forTest).map {  it.toPair() }
 
-fun loadStringTriples(dayNumber: Int, forTest: Boolean) = loadStringLists(dayNumber, forTest).map {
-  val (first, second, third) = it
-  Triple(first, second, third)
-}
+fun loadStringTriples(dayNumber: Int, forTest: Boolean) = loadStringLists(dayNumber, forTest).map { it.toTriple() }
 
 fun loadStringLists(dayNumber: Int, forTest: Boolean) = loadStrings(dayNumber, forTest).map { it.split(" ") }
 

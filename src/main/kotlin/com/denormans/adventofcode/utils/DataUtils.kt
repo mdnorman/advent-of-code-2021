@@ -1,6 +1,7 @@
 package com.denormans.adventofcode.utils
 
 import java.lang.Integer.max
+import kotlin.math.absoluteValue
 import kotlin.math.sqrt
 
 fun Pair<Int, Int>.toRange() = first.rangeTo(second)
@@ -10,6 +11,9 @@ data class Point(val x: Int, val y: Int) : Comparable<Point> {
   val distanceFromOriginSquared by lazy { x * x + y * y }
   val stepsFromOrigin by lazy { x + y }
   val diagonalStepsFromOrigin by lazy { max(x, y) }
+  val manhattanDistanceFromOrigin by lazy { manhattanDistanceFrom(Point(0, 0)) }
+
+  fun manhattanDistanceFrom(other: Point) = (x - other.x).absoluteValue + (y - other.y).absoluteValue
 
   fun interpolate(other: Point, includeDiagonal: Boolean = true): List<Point> {
     val (x1, y1) = this
@@ -54,12 +58,9 @@ data class Point(val x: Int, val y: Int) : Comparable<Point> {
 
   override fun toString() = "($x,$y)"
 
-  override fun compareTo(other: Point): Int {
-    if (x == other.x) {
-      return y - other.y
-    }
-
-    return x - other.x
+  override fun compareTo(other: Point) = when {
+      x != other.x -> x - other.x
+      else -> y - other.y
   }
 
   operator fun plus(point: Point) = Point(x + point.x, y + point.y)
@@ -83,4 +84,73 @@ class PointFromOriginComparator : Comparator<Point> {
 
 infix fun Int.by(y: Int) = Point(this, y)
 
+data class TriplePoint(val x: Int, val y: Int, val z: Int) : Comparable<TriplePoint> {
+  val distanceFromOrigin by lazy { sqrt(distanceFromOriginSquared.toDouble()) }
+  val distanceFromOriginSquared by lazy { x * x + y * y + z * z }
+
+  val manhattanDistanceFromOrigin by lazy { manhattanDistanceFrom(TriplePoint(0, 0, 0)) }
+
+  fun manhattanDistanceFrom(other: TriplePoint) = (x - other.x).absoluteValue + (y - other.y).absoluteValue + (z - other.z).absoluteValue
+
+  fun rotateAroundX() = TriplePoint(x, -z, y)
+  fun rotateAroundY() = TriplePoint(-z, y, x)
+  fun rotateAroundZ() = TriplePoint(-y, x, z)
+
+  fun withOrientation(orientation: Orientation) = orientation.orient(this)
+
+  override fun toString() = "($x,$y,$z)"
+
+  override fun compareTo(other: TriplePoint) = when {
+    x != other.x -> x - other.x
+    y != other.y -> y - other.y
+    else -> z - other.z
+  }
+
+  operator fun plus(point: TriplePoint) = TriplePoint(x + point.x, y + point.y, z + point.z)
+
+  operator fun minus(point: TriplePoint) = TriplePoint(x - point.x, y - point.y, z - point.z)
+
+  operator fun unaryMinus() = TriplePoint(-x, -y, -z)
+}
+
 val sevenSegmentNumbers = listOf("abcefg", "cf", "acdeg", "acdfg", "bcdf", "abdfg", "abdefg", "acf", "abcdefg", "abcdfg")
+
+data class Orientation(private val x: Int, private val y: Int, private val z: Int) {
+  fun orient(point: TriplePoint): TriplePoint = TriplePoint(point.getPart(x), point.getPart(y), point.getPart(z))
+
+  companion object {
+    val all by lazy {
+      val orientations = mutableSetOf<Orientation>()
+      var rotatedAroundX = TriplePoint(1, 2, 3)
+      for (i in 1..4) {
+        rotatedAroundX = rotatedAroundX.rotateAroundX()
+        orientations.add(rotatedAroundX.toOrientation())
+
+        var rotatedAroundY = rotatedAroundX.rotateAroundY()
+        for (j in 1..4) {
+          rotatedAroundY = rotatedAroundY.rotateAroundY()
+          orientations.add(rotatedAroundY.toOrientation())
+
+          var rotatedAroundZ = rotatedAroundY.rotateAroundZ()
+          for (k in 1..4) {
+            rotatedAroundZ = rotatedAroundZ.rotateAroundY()
+            orientations.add(rotatedAroundZ.toOrientation())
+          }
+        }
+      }
+      orientations
+    }
+
+    private fun TriplePoint.toOrientation() = Orientation(x, y, z)
+
+    private fun TriplePoint.getPart(orientationPart: Int): Int = when (orientationPart) {
+      1 -> x
+      -1 -> -x
+      2 -> y
+      -2 -> -y
+      3 -> z
+      -3 -> -z
+      else -> error("Invalid orientation part: $orientationPart")
+    }
+  }
+}

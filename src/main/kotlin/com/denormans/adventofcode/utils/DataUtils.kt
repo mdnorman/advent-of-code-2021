@@ -19,7 +19,6 @@ infix fun Point.by(z: Int) = TriplePoint(x, y, z)
 data class Point(val x: Int, val y: Int) : Comparable<Point> {
   val distanceFromOrigin by lazy { sqrt(distanceFromOriginSquared.toDouble()) }
   val distanceFromOriginSquared by lazy { x * x + y * y }
-  val stepsFromOrigin by lazy { x + y }
   val diagonalStepsFromOrigin by lazy { max(x, y) }
   val manhattanDistanceFromOrigin by lazy { manhattanDistanceFrom(0 by 0) }
 

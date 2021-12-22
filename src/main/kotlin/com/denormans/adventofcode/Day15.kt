@@ -8,11 +8,11 @@ import com.denormans.adventofcode.utils.loadStrings
 import com.denormans.adventofcode.utils.surroundingPoints
 import com.denormans.adventofcode.utils.toGrid
 import com.denormans.adventofcode.utils.withCount
-import java.lang.Math.min
+import kotlin.math.min
 import kotlin.random.Random
 
 fun main() {
-  val grid = loadStrings(15, forTest = true).map { it.map { it.toString().toInt() } }.toGrid()
+  val grid = loadStrings(15, forTest = false).map { it.map { it.toString().toInt() } }.toGrid()
   grid.displayGrid("")
 //  grid.chunked(10).values.forEachIndexed { rowIndex, row ->
 //    row.forEachIndexed { chunkIndex, chunk ->
@@ -26,10 +26,10 @@ fun main() {
 }
 
 private fun problemOne(grid: Grid<Int>) {
-  val pathToEnd = grid.findShortestPathToEnd()
+  val pathToEnd = grid.findPathToEnd2()
   println("Path to end: $pathToEnd")
 //  val cost = pathToEnd.subList(1, pathToEnd.size).sumOf { grid[it] }
-  val cost = pathToEnd.cost
+  val cost = pathToEnd.cost - pathToEnd.pointCost
 
   println("Problem 1: $cost")
 }
@@ -49,7 +49,15 @@ private data class Path(val currentPoint: Point, val pointCost: Int, val parentP
 
   fun hasPoint(point: Point): Boolean = currentPoint == point || (parentPath?.hasPoint(point) ?: false)
 
-  fun tail() = copy(parentPath = null)
+  fun withHead(head: Path): Path {
+    if (parentPath == null) {
+      return copy(parentPath = head)
+    }
+
+    return copy(parentPath = parentPath.withHead(head))
+  }
+
+  fun sliceTail() = copy(parentPath = null)
 
   override fun toString() = "$cost: " + points.joinToString(" ")
 
@@ -109,7 +117,7 @@ private fun Grid<Int>.findShortestPathToEnd(): Path {
       .filterNotNull()
       .minByOrNull { newPathToEnd -> newPathToEnd.cost } ?: return null
 
-    val newPathToEnd2 = newPathToEnd.copy(parentPath = forwardPath.tail())
+    val newPathToEnd2 = newPathToEnd.copy(parentPath = forwardPath.sliceTail())
 
     if (newPathToEnd2.currentPoint in bestPathToEndByStartingPoint) {
       println("Already had path to end for point: ${newPathToEnd2.currentPoint}")
@@ -171,40 +179,107 @@ private fun Grid<Int>.findPathToEnd2(): Path {
   val endPath = Path(end, this[end])
   val bestPathToEndByStartingPoint = mutableMapOf(end to endPath)
 
-  fun findBestPathToEnd(currentPoint: Point): Path? {
-    if (currentPoint in bestPathToEndByStartingPoint) {
-      return bestPathToEndByStartingPoint.getValue(currentPoint)
-    }
+  val pointsToProcess = (pointMap.keys - end).toMutableSet()
+//  val pointsToProcess = end.surroundingPoints(maxPoint).toMutableSet()
 
-    var bestPath: Path? = null
-    currentPoint.surroundingPoints(this.maxPoint).sortedBy { -it.stepsFromOrigin }.forEach { p ->
-      val pPath = findBestPathToEnd(p)
-      if (pPath != null) {
-        val newPath = pPath.copy(parentPath = Path(currentPoint, this[p]))
-        if (bestPath == null || newPath.cost < bestPath!!.cost) {
-          bestPath = newPath
-        }
+  fun nextPointToProcess() =
+    pointsToProcess.minWithOrNull { p1, p2 ->
+      val p1SurroundingPoints = p1.surroundingPoints(maxPoint)
+      val p2SurroundingPoints = p2.surroundingPoints(maxPoint)
+      val p1SurroundingPointsWithoutBest = p1SurroundingPoints.filter { it !in bestPathToEndByStartingPoint }.size
+      val p2SurroundingPointsWithoutBest = p2SurroundingPoints.filter { it !in bestPathToEndByStartingPoint }.size
+      val p1SurroundingPointsCost = p1SurroundingPoints.mapNotNull { bestPathToEndByStartingPoint[it]?.cost }
+        .minOrNull() ?: 1000
+      val p2SurroundingPointsCost = p2SurroundingPoints.mapNotNull { bestPathToEndByStartingPoint[it]?.cost }
+        .minOrNull() ?: 1000
+
+      when {
+        p1SurroundingPointsWithoutBest < p2SurroundingPointsWithoutBest -> -1
+        p1SurroundingPointsWithoutBest > p2SurroundingPointsWithoutBest -> 1
+        p1SurroundingPointsCost < p2SurroundingPointsCost -> -1
+        p1SurroundingPointsCost > p2SurroundingPointsCost -> 1
+        p1.manhattanDistanceFromOrigin < p2.manhattanDistanceFromOrigin -> 1
+        p1.manhattanDistanceFromOrigin > p2.manhattanDistanceFromOrigin -> -1
+        p1 < p2 -> 1
+        p1 > p2 -> -1
+        else -> 0
       }
     }
 
+  fun findBestPathToEnd(currentPoint: Point, prevBestPathCost: Int, seenPoints: Set<Point>): Path? {
+    if (seenPoints.contains(currentPoint)) {
+      return null
+    }
+
+    if (currentPoint in bestPathToEndByStartingPoint) {
+      val bestPath = bestPathToEndByStartingPoint.getValue(currentPoint)
+      return if (bestPath.cost < prevBestPathCost) {
+        bestPath
+      } else {
+        null
+      }
+    }
+
+    var bestPath: Path? = null
+    var bestPathCost = prevBestPathCost
+
+    val currentPointCost = this[currentPoint]
+    if (bestPathCost < currentPointCost) {
+//      println("$currentPoint fail $prevBestPathCost < $currentPointCost")
+      return null
+    }
+
+//    println("$currentPoint bestPathCost: $bestPathCost")
+    val newSeenPoints = seenPoints + currentPoint
+    currentPoint.surroundingPoints(maxPoint)
+      .sortedBy { bestPathToEndByStartingPoint[it]?.cost ?: (100000 - it.manhattanDistanceFromOrigin) }
+      .forEach { p ->
+//        println("$currentPoint surrounding point: $p")
+        val pPath = findBestPathToEnd(p, bestPathCost - currentPointCost, newSeenPoints)
+        if (pPath != null) {
+          val newPath = pPath.withHead(Path(currentPoint, currentPointCost))
+          if (bestPath == null || newPath.cost < bestPathCost) {
+//            println("$currentPoint new best: $newPath from $pPath")
+            bestPath = newPath
+            bestPathCost = min(bestPathCost, newPath.cost)
+          }
+        } else if (p !in bestPathToEndByStartingPoint) {
+//          pointsToProcess += p
+        }
+      }
+
     if (bestPath != null) {
+      println("$currentPoint storing best: $bestPath")
       bestPathToEndByStartingPoint[currentPoint] = bestPath!!
+      pointsToProcess -= currentPoint
     }
 
     return bestPath
   }
 
-//  val nextPoints = sortedMapOf(Comparator { p1, p2 ->
-//    when {
-//      p1.stepsFromOrigin < p2.stepsFromOrigin -> 1
-//      p1.stepsFromOrigin > p2.stepsFromOrigin -> -1
-//      p1 < p2 -> 1
-//      p1 > p2 -> -1
-//      else -> 0
+  while (startingPoint !in bestPathToEndByStartingPoint && pointsToProcess.isNotEmpty()) {
+    val currentPoint = nextPointToProcess() ?: error("No next point to process!")
+    val surroundingPoints = currentPoint.surroundingPoints(maxPoint)
+      .mapNotNull { bestPathToEndByStartingPoint[it]?.cost }
+    check(surroundingPoints.isNotEmpty()) { "$currentPoint has no surrounding points done!" }
+//    if (surroundingPoints.isEmpty()) {
+//      pointsToProcess -= currentPoint
+//      check(pointsToProcess.isNotEmpty()) { "$currentPoint is only point left!" }
+//      pointsToProcess += currentPoint
+//      continue
 //    }
-//  }, end to Path(end, this[end]))
+    val prevBestPathCost = surroundingPoints.minOf { it } + 10
+    println("Processing $currentPoint ($prevBestPathCost) of ${pointsToProcess.size}")
+    findBestPathToEnd(currentPoint, prevBestPathCost, emptySet()) ?: error("No best path for $currentPoint!")
+  }
 
-  TODO("Not implemented yet")
+  Grid(values.mapIndexed { y, row ->
+    row.mapIndexed { x, _ ->
+      bestPathToEndByStartingPoint[x by y]?.cost?.toString()?.padStart(2) ?: "  "
+    }
+  }).displayGrid()
+
+  return bestPathToEndByStartingPoint.getValue(startingPoint)
 }
 
 //private fun Grid<Int>.chunked(into: Int): Grid<Grid<Int>> =

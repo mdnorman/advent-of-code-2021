@@ -3,7 +3,7 @@ package com.denormans.adventofcode.utils
 data class Grid<T>(val values: List<List<T>>) {
   val maxPoint by lazy { values.maxPoint() }
 
-  operator fun get(point: Point) = values.getAt(point)
+  operator fun get(point: Point) = values[point.y][point.x]
 
   val pointMap by lazy { mapValuesIndexed { x, y, value -> x by y to value }.values.flatten().toMap() }
 
@@ -75,4 +75,3 @@ fun Point.surroundingPoints(max: Point, min: Point = 0 by 0, includeDiagonal: Bo
   return points
 }
 
-fun <T> List<List<T>>.getAt(point: Point) = this[point.x][point.y]

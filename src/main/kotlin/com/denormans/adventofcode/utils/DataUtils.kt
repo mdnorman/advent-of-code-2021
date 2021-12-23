@@ -2,6 +2,7 @@ package com.denormans.adventofcode.utils
 
 import java.lang.Integer.max
 import kotlin.math.absoluteValue
+import kotlin.math.min
 import kotlin.math.sqrt
 
 fun Pair<Int, Int>.toRange() = first.rangeTo(second)
@@ -120,6 +121,8 @@ data class TriplePoint(val x: Int, val y: Int, val z: Int) : Comparable<TriplePo
   operator fun unaryMinus() = -x by -y by -z
 
   companion object {
+    val ONE = 1 by 1 by 1
+
     fun parse(text: String, separator: Char = ',') = text.split(separator).toPoint()
 
     private fun List<String>.toPoint() = this[0].toInt() by this[1].toInt() by this[2].toInt()
@@ -177,5 +180,98 @@ data class Orientation(private val x: Int, private val y: Int, private val z: In
       -3 -> "-z"
       else -> error("Invalid orientation part: $orientationPart")
     }
+  }
+}
+
+val IntRange.size
+  get() = if (isEmpty()) { 0 } else { last - first + 1 }
+
+infix fun IntRange.intersect(other: IntRange): IntRange =
+  max(first, other.first)..min(last, other.last)
+
+infix fun IntRange.overlaps(other: IntRange) = first in other || last in other || other.first in this || other.last in this
+
+infix fun IntRange.encompasses(other: IntRange) = other.first in this && other.last in this
+
+data class TriplePointRange(val x: IntRange, val y: IntRange, val z: IntRange) : Comparable<TriplePointRange> {
+  val firstPoint by lazy { x.first by y.first by z.first }
+  val lastPoint by lazy { x.last by y.last by z.last }
+
+  val size by lazy { x.size.toLong() * y.size.toLong() * z.size.toLong() }
+
+  fun isEmpty() = x.isEmpty() || y.isEmpty() || z.isEmpty()
+
+  operator fun contains(point: TriplePoint) = point.x in x && point.y in y && point.z in z
+
+  infix fun intersect(other: TriplePointRange) =
+    TriplePointRange(x intersect other.x, y intersect other.y, z intersect other.z)
+
+  operator fun plus(other: TriplePointRange): Collection<TriplePointRange> {
+    if (this encompasses other) {
+      return listOf(this)
+    }
+
+    if (other encompasses this) {
+      return listOf(other)
+    }
+
+    val inBoth = intersect(other)
+    val onlyInThis = this - other
+    check(onlyInThis.none { it overlaps inBoth }) { "$onlyInThis overlaps $inBoth" }
+    val onlyInOther = other - this
+    check(onlyInOther.none { it overlaps inBoth }) { "$onlyInOther overlaps $inBoth" }
+
+    return onlyInThis + onlyInOther + inBoth
+  }
+
+  operator fun minus(other: TriplePointRange): Collection<TriplePointRange> {
+    if (other encompasses this) {
+      return emptyList()
+    }
+
+    val inBoth = intersect(other)
+
+    val sections = splitAt(inBoth.firstPoint, inBoth.lastPoint + TriplePoint.ONE)
+    return sections.filterNot { it overlaps inBoth }
+  }
+
+  infix fun overlaps(other: TriplePointRange) =
+    x overlaps other.x && y overlaps other.y && z overlaps other.z
+
+  infix fun encompasses(other: TriplePointRange) =
+    x encompasses other.x && y encompasses other.y && z encompasses other.z
+
+  fun splitAt(point1: TriplePoint, point2: TriplePoint): Set<TriplePointRange> =
+    splitAt(point1).flatMap { it.splitAt(point2) }.toSet()
+
+  fun splitAt(point: TriplePoint): Set<TriplePointRange> =
+    splitAlongX(point.x).flatMap { it.splitAlongY(point.y) }.flatMap { it.splitAlongZ(point.z) }.toSet()
+
+  fun splitAlongX(x: Int) = if (x in this.x && x != this.x.first && x != this.x.last + 1) {
+    listOf(copy(x = this.x.first until x), copy(x = x..this.x.last))
+  } else {
+    listOf(this)
+  }
+
+  fun splitAlongY(y: Int) = if (y in this.y && y != this.y.first && y != this.y.last + 1) {
+    listOf(copy(y = this.y.first until y), copy(y = y..this.y.last))
+  } else {
+    listOf(this)
+  }
+
+  fun splitAlongZ(z: Int) = if (z in this.z && z != this.z.first && z != this.z.last + 1) {
+    listOf(copy(z = this.z.first until z), copy(z = z..this.z.last))
+  } else {
+    listOf(this)
+  }
+
+  override fun compareTo(other: TriplePointRange) = when {
+    size < other.size -> -1
+    size > other.size -> 1
+    else -> 0
+  }
+
+  companion object {
+    val EMPTY = TriplePointRange(IntRange.EMPTY, IntRange.EMPTY, IntRange.EMPTY)
   }
 }

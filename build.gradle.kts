@@ -10,12 +10,12 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "com.denormans.adventofcode"
 version = "0.0.1"
 
-val kotlinVersion = "1.6.0"
-val junitVersion = "5.8.1"
+val kotlinVersion = "1.9.21"
+val junitVersion = "5.10.1"
 
 plugins {
-  kotlin("jvm") version "1.6.0"
-  id("org.jetbrains.dokka") version "1.6.0"
+  kotlin("jvm") version "1.9.21"
+  id("org.jetbrains.dokka") version "1.9.10"
   java
   `maven-publish`
 }
@@ -27,9 +27,9 @@ repositories {
 
 dependencies {
   implementation("com.github.ajalt:clikt:2.8.0")
-  implementation("io.github.microutils:kotlin-logging:2.1.0")
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
-  implementation("org.slf4j:slf4j-simple:1.7.32")
+  implementation("io.github.microutils:kotlin-logging:2.1.23")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+  implementation("org.slf4j:slf4j-simple:1.7.36")
   implementation(kotlin("reflect", kotlinVersion))
   implementation(kotlin("stdlib-jdk8", kotlinVersion))
   testImplementation("com.natpryce:hamkrest:1.8.0.1")
